@@ -103,4 +103,49 @@ class FroshProfiler extends Plugin
 
         $tool->dropSchema([$this->container->get('models')->getClassMetadata(Profile::class)]);
     }
+
+    public static function getSubscribedEvents()
+    {
+        return [
+            'Shopware_Controllers_Frontend_Checkout::saveOrder::replace' => 'replace',
+            'Shopware_Controllers_Frontend_Checkout::saveOrder::after' => [
+                ['after'],
+                ['after2'],
+            ]
+        ];
+    }
+
+    public function after(\Enlight_Hook_HookArgs $args)
+    {
+        /** @var \Shopware_Controllers_Frontend_Checkout $subject */
+        $subject = $args->getSubject();
+
+        echo "After!!";
+        $args->stop();
+    }
+
+    public function after2(\Enlight_Hook_HookArgs $args)
+    {
+        /** @var \Shopware_Controllers_Frontend_Checkout $subject */
+        $subject = $args->getSubject();
+
+        echo "After!!";
+    }
+
+    public function replace(\Enlight_Hook_HookArgs $arguments)
+    {
+        /** @var \Shopware_Controllers_Frontend_Checkout $subject */
+        $subject = $arguments->getSubject();
+
+        $arguments->setReturn(
+            $arguments->getSubject()->executeParent(
+                $arguments->getMethod(),
+                $arguments->getArgs()
+            )
+        );
+
+        $arguments->stop();
+
+        echo 'Replace';
+    }
 }
